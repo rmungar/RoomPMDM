@@ -1,15 +1,36 @@
 package com.example.roomtasklist.addtasks.ui
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.roomtasklist.addtasks.domain.AddTaskUseCase
+import com.example.roomtasklist.addtasks.domain.DeleteTaskUseCase
+import com.example.roomtasklist.addtasks.domain.GetTasksUseCase
+import com.example.roomtasklist.addtasks.domain.UpdateTaskUseCase
+import com.example.roomtasklist.addtasks.ui.TaskUiState
+import com.example.roomtasklist.addtasks.ui.TaskUiState.*
 import com.example.roomtasklist.addtasks.ui.model.TaskModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TasksViewModel @Inject constructor(): ViewModel() {
+class TasksViewModel @Inject constructor(
+    private val addTaskUseCase: AddTaskUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase,
+    private val deleteTaskUseCase: DeleteTaskUseCase,
+    getTasksUseCase: GetTasksUseCase
+): ViewModel() {
+
+    val uiState: StateFlow<TaskUiState> = getTasksUseCase().map(::Success)
+        .catch { Error(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Loading)
 
     private val _showDialog = MutableLiveData<Boolean>()
     val showDialog: LiveData<Boolean> = _showDialog
@@ -17,16 +38,15 @@ class TasksViewModel @Inject constructor(): ViewModel() {
     private val _myTaskText = MutableLiveData<String>()
     val myTaskText: LiveData<String> = _myTaskText
 
-    private val _tasks = mutableStateListOf<TaskModel>()
-    val tasks: List<TaskModel> = _tasks
-
     fun onDialogClose() {
         _showDialog.value = false
     }
 
     fun onTaskCreated() {
         onDialogClose()
-        _tasks.add(TaskModel(task = _myTaskText.value ?: ""))
+        viewModelScope.launch {
+            addTaskUseCase(TaskModel(task = _myTaskText.value ?: ""))
+        }
         _myTaskText.value = ""
     }
 
@@ -34,19 +54,20 @@ class TasksViewModel @Inject constructor(): ViewModel() {
         _showDialog.value = true
     }
 
-    fun onTaskTextChanged(taskText: String) {
-        _myTaskText.value = taskText
-    }
-
     fun onItemRemove(taskModel: TaskModel) {
-        val task = _tasks.find { it.id == taskModel.id }
-        _tasks.remove(task)
+        viewModelScope.launch {
+            deleteTaskUseCase(taskModel)
+        }
     }
 
     fun onCheckBoxSelected(taskModel: TaskModel) {
-        val index = _tasks.indexOf(taskModel)
+        viewModelScope.launch {
+            updateTaskUseCase(taskModel.copy(selected = !taskModel.selected))
+        }
+    }
 
-        _tasks[index] = _tasks[index].let { it.copy(selected = !it.selected) }
+    fun onTaskTextChanged(taskText: String) {
+        _myTaskText.value = taskText
     }
 
 }

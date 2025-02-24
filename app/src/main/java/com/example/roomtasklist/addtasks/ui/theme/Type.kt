@@ -1,4 +1,4 @@
-package com.example.roomtasklist.ui.theme
+package com.example.roomtasklist.addtasks.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -11,7 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.roomtasklist.addtasks.ui.TasksScreen
 import com.example.roomtasklist.addtasks.ui.TasksViewModel
-import com.example.roomtasklist.ui.theme.RoomTaskListTheme
+import com.example.roomtasklist.addtasks.ui.theme.RoomTaskListTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
