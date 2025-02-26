@@ -3,7 +3,6 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 
-    //DCS - Dagger Hilt
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
 }
@@ -71,26 +70,16 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-
-    //DCS - Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
-
-    //DCS - LiveData
     implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
-
-    //DCS - Room
     implementation("androidx.room:room-runtime:2.5.0")
     annotationProcessor("androidx.room:room-compiler:2.5.0")
-
-    // To use Kotlin annotation processing tool (kapt)
     kapt("androidx.room:room-compiler:2.5.0")
-
-    // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:2.5.0")
 }
 
-//DCS - Dagger Hilt - Allow references to generated code
+
 kapt {
     correctErrorTypes = true
 }
